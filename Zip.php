@@ -28,48 +28,48 @@ class Zip {
     const ATTR_VERSION_TO_EXTRACT = "\x14\x00"; // Version needed to extract
     const ATTR_MADE_BY_VERSION = "\x1E\x03"; // Made By Version
 
-	// Unix file types
-	const S_IFIFO  = 0010000; // named pipe (fifo)
-	const S_IFCHR  = 0020000; // character special
-	const S_IFDIR  = 0040000; // directory
-	const S_IFBLK  = 0060000; // block special
-	const S_IFREG  = 0100000; // regular
-	const S_IFLNK  = 0120000; // symbolic link
-	const S_IFSOCK = 0140000; // socket
+    // Unix file types
+    const S_IFIFO  = 0010000; // named pipe (fifo)
+    const S_IFCHR  = 0020000; // character special
+    const S_IFDIR  = 0040000; // directory
+    const S_IFBLK  = 0060000; // block special
+    const S_IFREG  = 0100000; // regular
+    const S_IFLNK  = 0120000; // symbolic link
+    const S_IFSOCK = 0140000; // socket
 
-	// setuid/setgid/sticky bits, the same as for chmod:
+    // setuid/setgid/sticky bits, the same as for chmod:
 
-	const S_ISUID  = 0004000; // set user id on execution
-	const S_ISGID  = 0002000; // set group id on execution
-	const S_ISTXT  = 0001000; // sticky bit
+    const S_ISUID  = 0004000; // set user id on execution
+    const S_ISGID  = 0002000; // set group id on execution
+    const S_ISTXT  = 0001000; // sticky bit
 
-	// And of course, the other 12 bits are for the permissions, the same as for chmod:
-	// When addding these up, you can also just write the permissions as a simgle octal number
-	// ie. 0755. The leading 0 specifies octal notation.
-	const S_IRWXU  = 0000700; // RWX mask for owner
-	const S_IRUSR  = 0000400; // R for owner
-	const S_IWUSR  = 0000200; // W for owner
-	const S_IXUSR  = 0000100; // X for owner
-	const S_IRWXG  = 0000070; // RWX mask for group
-	const S_IRGRP  = 0000040; // R for group
-	const S_IWGRP  = 0000020; // W for group
-	const S_IXGRP  = 0000010; // X for group
-	const S_IRWXO  = 0000007; // RWX mask for other
-	const S_IROTH  = 0000004; // R for other
-	const S_IWOTH  = 0000002; // W for other
-	const S_IXOTH  = 0000001; // X for other
-	const S_ISVTX  = 0001000; // save swapped text even after use
+    // And of course, the other 12 bits are for the permissions, the same as for chmod:
+    // When addding these up, you can also just write the permissions as a simgle octal number
+    // ie. 0755. The leading 0 specifies octal notation.
+    const S_IRWXU  = 0000700; // RWX mask for owner
+    const S_IRUSR  = 0000400; // R for owner
+    const S_IWUSR  = 0000200; // W for owner
+    const S_IXUSR  = 0000100; // X for owner
+    const S_IRWXG  = 0000070; // RWX mask for group
+    const S_IRGRP  = 0000040; // R for group
+    const S_IWGRP  = 0000020; // W for group
+    const S_IXGRP  = 0000010; // X for group
+    const S_IRWXO  = 0000007; // RWX mask for other
+    const S_IROTH  = 0000004; // R for other
+    const S_IWOTH  = 0000002; // W for other
+    const S_IXOTH  = 0000001; // X for other
+    const S_ISVTX  = 0001000; // save swapped text even after use
 
-	// Filetype, sticky and permissions are added up, and shifted 16 bits left BEFORE adding the DOS flags.
+    // Filetype, sticky and permissions are added up, and shifted 16 bits left BEFORE adding the DOS flags.
 
-	// DOS file type flags, we really only use the S_DOS_D flag.
+    // DOS file type flags, we really only use the S_DOS_D flag.
 
-	const S_DOS_A  = 0000040; // DOS flag for Archive
-	const S_DOS_D  = 0000020; // DOS flag for Directory
-	const S_DOS_V  = 0000010; // DOS flag for Volume
-	const S_DOS_S  = 0000004; // DOS flag for System
-	const S_DOS_H  = 0000002; // DOS flag for Hidden
-	const S_DOS_R  = 0000001; // DOS flag for Read Only
+    const S_DOS_A  = 0000040; // DOS flag for Archive
+    const S_DOS_D  = 0000020; // DOS flag for Directory
+    const S_DOS_V  = 0000010; // DOS flag for Volume
+    const S_DOS_S  = 0000004; // DOS flag for System
+    const S_DOS_H  = 0000002; // DOS flag for Hidden
+    const S_DOS_R  = 0000001; // DOS flag for Read Only
 
     private $zipMemoryThreshold = 1048576; // Autocreate tempfile if the zip data exceeds 1048576 bytes (1 MB)
 
@@ -88,7 +88,7 @@ class Zip {
     private $streamFile = NULL;
     private $streamData = NULL;
     private $streamFileLength = 0;
-	private $streamExtFileAttr = null;
+    private $streamExtFileAttr = null;
 
     /**
      * Constructor.
@@ -172,7 +172,7 @@ class Zip {
      * @param string $directoryPath Directory Path and name to be added to the archive.
      * @param int    $timestamp     (Optional) Timestamp for the added directory, if omitted or set to 0, the current time will be used.
      * @param string $fileComment   (Optional) Comment to be added to the archive for this directory. To use fileComment, timestamp must be given.
-	 * @param int    $extFileAttr   (Optional) The external file reference, use generateExtAttr to generate this.
+     * @param int    $extFileAttr   (Optional) The external file reference, use generateExtAttr to generate this.
      * @return bool $success
      */
     public function addDirectory($directoryPath, $timestamp = 0, $fileComment = NULL, $extFileAttr = self::EXT_FILE_ATTR_DIR) {
@@ -197,7 +197,7 @@ class Zip {
      * @param int    $timestamp   (Optional) Timestamp for the added file, if omitted or set to 0, the current time will be used.
      * @param string $fileComment (Optional) Comment to be added to the archive for this file. To use fileComment, timestamp must be given.
      * @param bool   $compress    (Optional) Compress file, if set to FALSE the file will only be stored. Default TRUE.
-	 * @param int    $extFileAttr (Optional) The external file reference, use generateExtAttr to generate this.
+     * @param int    $extFileAttr (Optional) The external file reference, use generateExtAttr to generate this.
      * @return bool $success
      */
     public function addFile($data, $filePath, $timestamp = 0, $fileComment = NULL, $compress = TRUE, $extFileAttr = self::EXT_FILE_ATTR_FILE) {
@@ -256,20 +256,20 @@ class Zip {
      * @param array &$addedFiles     Reference to the added files, this is used to prevent duplicates, efault is an empty array.
      *                               If you start the function by parsing an array, the array will be populated with the realPath
      *                               and zipPath kay/value pairs added to the archive by the function.
-	 * @param bool   $overrideFilePermissions Force the use of the file/dir permissions set in the $extDirAttr
-	 *							     and $extFileAttr parameters.
-	 * @param int    $extDirAttr     Permissions for directories.
-	 * @param int    $extFileAttr    Permissions for files.
+     * @param bool   $overrideFilePermissions Force the use of the file/dir permissions set in the $extDirAttr
+     *                               and $extFileAttr parameters.
+     * @param int    $extDirAttr     Permissions for directories.
+     * @param int    $extFileAttr    Permissions for files.
      */
     public function addDirectoryContent($realPath, $zipPath, $recursive = TRUE, $followSymlinks = TRUE, &$addedFiles = array(),
-					$overrideFilePermissions = FALSE, $extDirAttr = self::EXT_FILE_ATTR_DIR, $extFileAttr = self::EXT_FILE_ATTR_FILE) {
+                    $overrideFilePermissions = FALSE, $extDirAttr = self::EXT_FILE_ATTR_DIR, $extFileAttr = self::EXT_FILE_ATTR_FILE) {
         if (file_exists($realPath) && !isset($addedFiles[realpath($realPath)])) {
             if (is_dir($realPath)) {
-				if ($overrideFilePermissions) {
-	                $this->addDirectory($zipPath, 0, null, $extDirAttr);
-				} else {
-					$this->addDirectory($zipPath, 0, null, self::getFileExtAttr($realPath));
-				}
+                if ($overrideFilePermissions) {
+                    $this->addDirectory($zipPath, 0, null, $extDirAttr);
+                } else {
+                    $this->addDirectory($zipPath, 0, null, self::getFileExtAttr($realPath));
+                }
             }
 
             $addedFiles[realpath($realPath)] = $zipPath;
@@ -285,19 +285,19 @@ class Zip {
                 if (file_exists($newRealPath) && ($followSymlinks === TRUE || !is_link($newRealPath))) {
                     if ($file->isFile()) {
                         $addedFiles[realpath($newRealPath)] = $newZipPath;
-						if ($overrideFilePermissions) {
-							$this->addLargeFile($newRealPath, $newZipPath, 0, null, $extFileAttr);
-						} else {
-							$this->addLargeFile($newRealPath, $newZipPath, 0, null, self::getFileExtAttr($newRealPath));
-						}
+                        if ($overrideFilePermissions) {
+                            $this->addLargeFile($newRealPath, $newZipPath, 0, null, $extFileAttr);
+                        } else {
+                            $this->addLargeFile($newRealPath, $newZipPath, 0, null, self::getFileExtAttr($newRealPath));
+                        }
                     } else if ($recursive === TRUE) {
                         $this->addDirectoryContent($newRealPath, $newZipPath, $recursive, $followSymlinks, $addedFiles, $overrideFilePermissions, $extDirAttr, $extFileAttr);
                     } else {
-						if ($overrideFilePermissions) {
-							$this->addDirectory($zipPath, 0, null, $extDirAttr);
-						} else {
-							$this->addDirectory($zipPath, 0, null, self::getFileExtAttr($newRealPath));
-						}
+                        if ($overrideFilePermissions) {
+                            $this->addDirectory($zipPath, 0, null, $extDirAttr);
+                        } else {
+                            $this->addDirectory($zipPath, 0, null, self::getFileExtAttr($newRealPath));
+                        }
                     }
                 }
             }
@@ -311,7 +311,7 @@ class Zip {
      * @param string $filePath    Filepath and name to be used in the archive.
      * @param int    $timestamp   (Optional) Timestamp for the added file, if omitted or set to 0, the current time will be used.
      * @param string $fileComment (Optional) Comment to be added to the archive for this file. To use fileComment, timestamp must be given.
-	 * @param int    $extFileAttr (Optional) The external file reference, use generateExtAttr to generate this.
+     * @param int    $extFileAttr (Optional) The external file reference, use generateExtAttr to generate this.
      * @return bool $success
      */
     public function addLargeFile($dataFile, $filePath, $timestamp = 0, $fileComment = NULL, $extFileAttr = self::EXT_FILE_ATTR_FILE)   {
@@ -339,7 +339,7 @@ class Zip {
      * @param string $filePath    Filepath and name to be used in the archive.
      * @param int    $timestamp   (Optional) Timestamp for the added file, if omitted or set to 0, the current time will be used.
      * @param string $fileComment (Optional) Comment to be added to the archive for this file. To use fileComment, timestamp must be given.
-	 * @param int    $extFileAttr (Optional) The external file reference, use generateExtAttr to generate this.
+     * @param int    $extFileAttr (Optional) The external file reference, use generateExtAttr to generate this.
      * @return bool $success
      */
     public function openStream($filePath, $timestamp = 0, $fileComment = null, $extFileAttr = self::EXT_FILE_ATTR_FILE)   {
@@ -363,7 +363,7 @@ class Zip {
         $this->streamTimestamp = $timestamp;
         $this->streamFileComment = $fileComment;
         $this->streamFileLength = 0;
-		$this->streamExtFileAttr = $extFileAttr;
+        $this->streamExtFileAttr = $extFileAttr;
 
         return TRUE;
     }
@@ -408,7 +408,7 @@ class Zip {
         $this->streamTimestamp = null;
         $this->streamFileComment = null;
         $this->streamFileLength = 0;
-		$this->streamExtFileAttr = null;
+        $this->streamExtFileAttr = null;
 
         // Windows is a little slow at times, so a millisecond later, we can unlink this.
         unlink($this->streamFile);
@@ -568,15 +568,15 @@ class Zip {
                 $cd = "Content-Disposition: ";
                 if ($inline) {
                     $cd .= "inline";
-				} else{
+                } else{
                     $cd .= "attached";
-				}
+                }
                 if ($fileName) {
                     $cd .= '; filename="' . $fileName . '"';
-				}
+                }
                 if ($utf8FileName) {
                     $cd .= "; filename*=UTF-8''" . rawurlencode($utf8FileName);
-				}
+                }
                 header($cd);
                 header("Content-Length: ". $this->getArchiveSize());
 
@@ -738,10 +738,10 @@ class Zip {
      * Clean up a path, removing any unnecessary elements such as /./, // or redundant ../ segments.
      * If the path starts with a "/", it is deemed an absolute path and any /../ in the beginning is stripped off.
      * The returned path will not end in a "/".
-	 *
-	 * Sometimes, when a path is generated from multiple fragments, 
-	 *  you can get something like "../data/html/../images/image.jpeg"
-	 * This will normalize that example path to "../data/images/image.jpeg"
+     *
+     * Sometimes, when a path is generated from multiple fragments, 
+     *  you can get something like "../data/html/../images/image.jpeg"
+     * This will normalize that example path to "../data/images/image.jpeg"
      *
      * @param string $path The path to clean up
      * @return string the clean path
@@ -785,34 +785,34 @@ class Zip {
         return $root . implode("/", array_slice($newDirs, 0, $offset));
     }
 
-	/**
-	 * Create the file permissions for a file or directory, for use in the extFileAttr parameters.
-	 *
-	 * @param int   $owner Unix permisions for owner (octal from 00 to 07)
-	 * @param int   $group Unix permisions for group (octal from 00 to 07)
-	 * @param int   $other Unix permisions for others (octal from 00 to 07)
-	 * @param bool  $isFile
-	 * @return EXTRERNAL_REF field.
-	 */
-	public static function generateExtAttr($owner = 07, $group = 05, $other = 05, $isFile = true) {
-		$fp = $isFile ? self::S_IFREG : self::S_IFDIR;
-		$fp |= (($owner & 07) << 6) | (($group & 07) << 3) | ($other & 07);
+    /**
+     * Create the file permissions for a file or directory, for use in the extFileAttr parameters.
+     *
+     * @param int   $owner Unix permisions for owner (octal from 00 to 07)
+     * @param int   $group Unix permisions for group (octal from 00 to 07)
+     * @param int   $other Unix permisions for others (octal from 00 to 07)
+     * @param bool  $isFile
+     * @return EXTRERNAL_REF field.
+     */
+    public static function generateExtAttr($owner = 07, $group = 05, $other = 05, $isFile = true) {
+        $fp = $isFile ? self::S_IFREG : self::S_IFDIR;
+        $fp |= (($owner & 07) << 6) | (($group & 07) << 3) | ($other & 07);
 
-		return ($fp << 16) | ($isFile ? self::S_DOS_A : self::S_DOS_D);
-	}
+        return ($fp << 16) | ($isFile ? self::S_DOS_A : self::S_DOS_D);
+    }
 
-	/**
-	 * Get the file permissions for a file or directory, for use in the extFileAttr parameters.
-	 *
-	 * @param string $filename
-	 * @return external ref field, or FALSE if the file is not found.
-	 */
-	public static function getFileExtAttr($filename) {
-		if (file_exists($filename)) {
-			$fp = fileperms($filename) << 16;
-			return $fp | (is_dir($filename) ? self::S_DOS_D : self::S_DOS_A);
-		}
-		return FALSE;
-	}
+    /**
+     * Get the file permissions for a file or directory, for use in the extFileAttr parameters.
+     *
+     * @param string $filename
+     * @return external ref field, or FALSE if the file is not found.
+     */
+    public static function getFileExtAttr($filename) {
+        if (file_exists($filename)) {
+            $fp = fileperms($filename) << 16;
+            return $fp | (is_dir($filename) ? self::S_DOS_D : self::S_DOS_A);
+        }
+        return FALSE;
+    }
 }
 ?>

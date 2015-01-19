@@ -29,28 +29,28 @@ class Ncx {
     public $chapterList = array();
     public $referencesTitle = "Guide";
     public $referencesClass = "references";
-	public $referencesId = "references";
-	public $referencesList = array();
+    public $referencesId = "references";
+    public $referencesList = array();
     public $referencesName = array();
     public $referencesOrder = NULL;
 
     /**
      * Class constructor.
-	 *
-	 * @param string $uid
-	 * @param string $docTitle
-	 * @param string $docAuthor
-	 * @param string $languageCode
-	 * @param string $writingDirection
-	 */
+     *
+     * @param string $uid
+     * @param string $docTitle
+     * @param string $docAuthor
+     * @param string $languageCode
+     * @param string $writingDirection
+     */
     function __construct($uid = NULL, $docTitle = NULL, $docAuthor = NULL, $languageCode = "en", $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
         $this->navMap = new NavMap($writingDirection);
         $this->currentLevel = $this->navMap;
         $this->setUid($uid);
         $this->setDocTitle($docTitle);
         $this->setDocAuthor($docAuthor);
-		$this->setLanguageCode($languageCode);
-		$this->setWritingDirection($writingDirection);
+        $this->setLanguageCode($languageCode);
+        $this->setWritingDirection($writingDirection);
     }
 
     /**
@@ -61,10 +61,10 @@ class Ncx {
     function __destruct() {
         unset($this->bookVersion, $this->navMap, $this->uid, $this->meta);
         unset($this->docTitle, $this->docAuthor, $this->currentLevel, $this->lastLevel);
-		unset($this->languageCode, $this->writingDirection, $this->chapterList, $this->referencesTitle);
-		unset($this->referencesClass, $this->referencesId, $this->referencesList, $this->referencesName);
-		unset($this->referencesOrder);
-	}
+        unset($this->languageCode, $this->writingDirection, $this->chapterList, $this->referencesTitle);
+        unset($this->referencesClass, $this->referencesId, $this->referencesList, $this->referencesName);
+        unset($this->referencesOrder);
+    }
 
     /**
      *
@@ -76,10 +76,10 @@ class Ncx {
         $this->bookVersion = is_string($bookVersion) ? trim($bookVersion) : EPub::BOOK_VERSION_EPUB2;
     }
 
-	/**
-	 *
-	 * @return bool TRUE if the book is set to type ePub 2
-	 */
+    /**
+     *
+     * @return bool TRUE if the book is set to type ePub 2
+     */
     function isEPubVersion2() {
         return $this->bookVersion === EPub::BOOK_VERSION_EPUB2;
    }
@@ -150,24 +150,24 @@ class Ncx {
      * Add one chapter level.
      *
      * Subsequent chapters will be added to this level.
-	 *
-	 * @param string $navTitle
-	 * @param string $navId
-	 * @param string $navClass
-	 * @param string $isNavHidden
-	 * @param string $writingDirection
-	 * @return NavPoint
-	 */
+     *
+     * @param string $navTitle
+     * @param string $navId
+     * @param string $navClass
+     * @param string $isNavHidden
+     * @param string $writingDirection
+     * @return NavPoint
+     */
     function subLevel($navTitle = NULL, $navId = NULL, $navClass = NULL, $isNavHidden = FALSE, $writingDirection = NULL) {
-		$navPoint = FALSE;
-		if (isset($navTitle) && isset($navClass)) {
-			$navPoint = new NavPoint($navTitle, NULL, $navId, $navClass, $isNavHidden, $writingDirection);
-			$this->addNavPoint($navPoint);
-		}
+        $navPoint = FALSE;
+        if (isset($navTitle) && isset($navClass)) {
+            $navPoint = new NavPoint($navTitle, NULL, $navId, $navClass, $isNavHidden, $writingDirection);
+            $this->addNavPoint($navPoint);
+        }
         if ($this->lastLevel !== NULL) {
             $this->currentLevel = $this->lastLevel;
         }
-		return $navPoint;
+        return $navPoint;
     }
 
     /**
@@ -290,14 +290,14 @@ class Ncx {
         return $ncx . "</ncx>\n";
     }
 
-	/**
-	 *
-	 * @param string $title
-	 * @param string $cssFileName
-	 * @return string
-	 */
+    /**
+     *
+     * @param string $title
+     * @param string $cssFileName
+     * @return string
+     */
     function finalizeEPub3($title = "Table of Contents", $cssFileName = NULL) {
-		$end = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        $end = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             . "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n"
             . "      xmlns:epub=\"http://www.idpf.org/2007/ops\"\n"
             . "      xml:lang=\"" . $this->languageCode . "\" lang=\"" . $this->languageCode . "\" dir=\"" . $this->writingDirection . "\">\n"
@@ -320,60 +320,60 @@ class Ncx {
         return $end;
     }
 
-	/**
-	 * Build the references for the ePub 2 toc.
-	 * These are merely reference pages added to the end of the navMap though.
-	 *
-	 * @return string
-	 */
-	function finalizeReferences() {
-		if (isset($this->referencesList) && sizeof($this->referencesList) > 0) {
-			$this->rootLevel();
-			$this->subLevel($this->referencesTitle, $this->referencesId, $this->referencesClass);
-			$refId = 1;
-			while (list($item, $descriptive) = each($this->referencesOrder)) {
-				if (array_key_exists($item, $this->referencesList)) {
-					$name = (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item]);
-					$navPoint = new NavPoint($name, $this->referencesList[$item], "ref-" . $refId++);
-					$this->addNavPoint($navPoint);
-				}
-			}
-		}
-	}
+    /**
+     * Build the references for the ePub 2 toc.
+     * These are merely reference pages added to the end of the navMap though.
+     *
+     * @return string
+     */
+    function finalizeReferences() {
+        if (isset($this->referencesList) && sizeof($this->referencesList) > 0) {
+            $this->rootLevel();
+            $this->subLevel($this->referencesTitle, $this->referencesId, $this->referencesClass);
+            $refId = 1;
+            while (list($item, $descriptive) = each($this->referencesOrder)) {
+                if (array_key_exists($item, $this->referencesList)) {
+                    $name = (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item]);
+                    $navPoint = new NavPoint($name, $this->referencesList[$item], "ref-" . $refId++);
+                    $this->addNavPoint($navPoint);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Build the landmarks for the ePub 3 toc.
-	 * @return string
-	 */
-	function finalizeEPub3Landmarks() {
-		$lm = "";
-		if (isset($this->referencesList) && sizeof($this->referencesList) > 0) {
-			$lm = "\t\t\t<nav epub:type=\"landmarks\">\n"
-					. "\t\t\t\t<h2"
-					. ($this->writingDirection === EPub::DIRECTION_RIGHT_TO_LEFT ? " dir=\"rtl\"" : "")
-					. ">" . $this->referencesTitle . "</h2>\n"
-					. "\t\t\t\t<ol>\n";
+    /**
+     * Build the landmarks for the ePub 3 toc.
+     * @return string
+     */
+    function finalizeEPub3Landmarks() {
+        $lm = "";
+        if (isset($this->referencesList) && sizeof($this->referencesList) > 0) {
+            $lm = "\t\t\t<nav epub:type=\"landmarks\">\n"
+                    . "\t\t\t\t<h2"
+                    . ($this->writingDirection === EPub::DIRECTION_RIGHT_TO_LEFT ? " dir=\"rtl\"" : "")
+                    . ">" . $this->referencesTitle . "</h2>\n"
+                    . "\t\t\t\t<ol>\n";
 
-			$li = "";
-			while (list($item, $descriptive) = each($this->referencesOrder)) {
-				if (array_key_exists($item, $this->referencesList)) {
-					$li .= "\t\t\t\t\t<li><a epub:type=\""
-							. $item
-							. "\" href=\"" . $this->referencesList[$item] . "\">"
-							. (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item])
-							. "</a></li>\n";
-				}
-			}
-			if (empty($li)) {
-				return "";
-			}
+            $li = "";
+            while (list($item, $descriptive) = each($this->referencesOrder)) {
+                if (array_key_exists($item, $this->referencesList)) {
+                    $li .= "\t\t\t\t\t<li><a epub:type=\""
+                            . $item
+                            . "\" href=\"" . $this->referencesList[$item] . "\">"
+                            . (empty($this->referencesName[$item]) ? $descriptive : $this->referencesName[$item])
+                            . "</a></li>\n";
+                }
+            }
+            if (empty($li)) {
+                return "";
+            }
 
-			$lm .= $li
-					. "\t\t\t\t</ol>\n"
-					. "\t\t\t</nav>\n";
-		}
-		return $lm;
-	}
+            $lm .= $li
+                    . "\t\t\t\t</ol>\n"
+                    . "\t\t\t</nav>\n";
+        }
+        return $lm;
+    }
 }
 
 /**
@@ -384,7 +384,7 @@ class NavMap {
 
     private $navPoints = array();
     private $navLevels = 0;
-	private $writingDirection = NULL;
+    private $writingDirection = NULL;
 
     /**
      * Class constructor.
@@ -392,7 +392,7 @@ class NavMap {
      * @return void
      */
     function __construct($writingDirection = NULL) {
-		$this->setWritingDirection($writingDirection);
+        $this->setWritingDirection($writingDirection);
     }
 
     /**
@@ -426,9 +426,9 @@ class NavMap {
     function addNavPoint($navPoint) {
         if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "NavPoint") {
             $navPoint->setParent($this);
-			if ($navPoint->getWritingDirection() == NULL) {
-				$navPoint->setWritingDirection($this->writingDirection);
-			}
+            if ($navPoint->getWritingDirection() == NULL) {
+                $navPoint->setWritingDirection($this->writingDirection);
+            }
             $this->navPoints[] = $navPoint;
             return $navPoint;
         }
@@ -513,8 +513,8 @@ class NavPoint {
     private $id = NULL;
     private $navClass = NULL;
     private $isNavHidden = FALSE;
-	private $navPoints = array();
-	private $parent = NULL;
+    private $navPoints = array();
+    private $parent = NULL;
 
     /**
      * Class constructor.
@@ -524,17 +524,17 @@ class NavPoint {
      * @param string $label
      * @param string $contentSrc
      * @param string $id
-	 * @param string $navClass
-	 * @param bool   $isNavHidden
-	 * @param string $writingDirection
-	 */
+     * @param string $navClass
+     * @param bool   $isNavHidden
+     * @param string $writingDirection
+     */
     function __construct($label, $contentSrc = NULL, $id = NULL, $navClass = NULL, $isNavHidden = FALSE, $writingDirection = NULL) {
         $this->setLabel($label);
         $this->setContentSrc($contentSrc);
         $this->setId($id);
         $this->setNavClass($navClass);
         $this->setNavHidden($isNavHidden);
-		$this->setWritingDirection($writingDirection);
+        $this->setWritingDirection($writingDirection);
     }
 
     /**
@@ -658,7 +658,7 @@ class NavPoint {
         return $this->writingDirection;
     }
 
-	/**
+    /**
      * Add child NavPoints for multi level NavMaps.
      *
      * @param NavPoint $navPoint
@@ -666,9 +666,9 @@ class NavPoint {
     function addNavPoint($navPoint) {
         if ($navPoint != NULL && is_object($navPoint) && get_class($navPoint) === "NavPoint") {
             $navPoint->setParent($this);
-			if ($navPoint->getWritingDirection() == NULL) {
-				$navPoint->setWritingDirection($this->writingDirection);
-			}
+            if ($navPoint->getWritingDirection() == NULL) {
+                $navPoint->setWritingDirection($this->writingDirection);
+            }
             $this->navPoints[] = $navPoint;
             return $navPoint;
         }
@@ -688,24 +688,24 @@ class NavPoint {
         $maxLevel = $level;
         $levelAdjust = 0;
 
-		if ($this->isNavHidden) {
-			return $maxLevel;
-		}
+        if ($this->isNavHidden) {
+            return $maxLevel;
+        }
 
-		if (isset($this->contentSrc)) {
-			$playOrder++;
+        if (isset($this->contentSrc)) {
+            $playOrder++;
 
-			if ($this->id == NULL) {
-				$this->id = "navpoint-" . $playOrder;
-			}
-			$nav .= str_repeat("\t", $level) . "\t\t<navPoint id=\"" . $this->id . "\" playOrder=\"" . $playOrder . "\">\n"
-			. str_repeat("\t", $level) . "\t\t\t<navLabel>\n"
-			. str_repeat("\t", $level) . "\t\t\t\t<text>" . $this->label . "</text>\n"
-			. str_repeat("\t", $level) . "\t\t\t</navLabel>\n"
-			. str_repeat("\t", $level) . "\t\t\t<content src=\"" . $this->contentSrc . "\" />\n";
-		} else {
-			$levelAdjust++;
-		}
+            if ($this->id == NULL) {
+                $this->id = "navpoint-" . $playOrder;
+            }
+            $nav .= str_repeat("\t", $level) . "\t\t<navPoint id=\"" . $this->id . "\" playOrder=\"" . $playOrder . "\">\n"
+            . str_repeat("\t", $level) . "\t\t\t<navLabel>\n"
+            . str_repeat("\t", $level) . "\t\t\t\t<text>" . $this->label . "</text>\n"
+            . str_repeat("\t", $level) . "\t\t\t</navLabel>\n"
+            . str_repeat("\t", $level) . "\t\t\t<content src=\"" . $this->contentSrc . "\" />\n";
+        } else {
+            $levelAdjust++;
+        }
 
         if (sizeof($this->navPoints) > 0) {
             $maxLevel++;
@@ -717,9 +717,9 @@ class NavPoint {
             }
         }
 
-		if (isset($this->contentSrc)) {
-	        $nav .= str_repeat("\t", $level) . "\t\t</navPoint>\n";
-		}
+        if (isset($this->contentSrc)) {
+            $nav .= str_repeat("\t", $level) . "\t\t</navPoint>\n";
+        }
 
         return $maxLevel;
     }
@@ -739,30 +739,30 @@ class NavPoint {
         if ($this->id == NULL) {
             $this->id = "navpoint-" . $playOrder;
         }
-		$indent = str_repeat("\t", $level) . "\t\t\t\t";
+        $indent = str_repeat("\t", $level) . "\t\t\t\t";
 
         $nav .= $indent . "<li id=\"" . $this->id . "\"";
-		if (isset($this->writingDirection)) {
-			$nav .= " dir=\"" . $this->writingDirection . "\"";
-		}
-		$nav .=  ">\n";
+        if (isset($this->writingDirection)) {
+            $nav .= " dir=\"" . $this->writingDirection . "\"";
+        }
+        $nav .=  ">\n";
 
-		if (isset($this->contentSrc)) {
-			$nav .= $indent . "\t<a href=\"" . $this->contentSrc . "\">" . $this->label . "</a>\n";
-		} else {
-			$nav .= $indent . "\t<span>" . $this->label . "</span>\n";
-		}
+        if (isset($this->contentSrc)) {
+            $nav .= $indent . "\t<a href=\"" . $this->contentSrc . "\">" . $this->label . "</a>\n";
+        } else {
+            $nav .= $indent . "\t<span>" . $this->label . "</span>\n";
+        }
 
         if (sizeof($this->navPoints) > 0) {
             $maxLevel++;
 
-			$nav .= $indent . "\t<ol epub:type=\"list\"";
+            $nav .= $indent . "\t<ol epub:type=\"list\"";
             if (isset($subLevelClass)) {
-				$nav .= " class=\"" . $subLevelClass . "\"";
-			}
+                $nav .= " class=\"" . $subLevelClass . "\"";
+            }
             if ($subLevelHidden) {
-				$nav .= " hidden=\"hidden\"";
-			}
+                $nav .= " hidden=\"hidden\"";
+            }
             $nav .= ">\n";
 
             foreach ($this->navPoints as $navPoint) {

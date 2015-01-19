@@ -36,20 +36,22 @@ class EPub {
     const DIRECTION_LEFT_TO_RIGHT = "ltr";
     const DIRECTION_RIGHT_TO_LEFT = "rtl";
 
-	const BOOK_VERSION_EPUB2 = "2.0";
+    const BOOK_VERSION_EPUB2 = "2.0";
     const BOOK_VERSION_EPUB3 = "3.0";
 
     private $bookVersion = EPub::BOOK_VERSION_EPUB2;
 
-	public $maxImageWidth = 768;
+    private $debugInside = FALSE;
+
+    public $maxImageWidth = 768;
     public $maxImageHeight = 1024;
 
     public $splitDefaultSize = 250000;
-	/** Gifs can crash some early ADE based readers, and are disabled by default.
-	 * getImage will convert these if it can, unless this is set to TRUE.
-	 */
+    /** Gifs can crash some early ADE based readers, and are disabled by default.
+     * getImage will convert these if it can, unless this is set to TRUE.
+     */
     public $isGifImagesEnabled = FALSE;
-	public $isReferencesAddedToToc = TRUE;
+    public $isReferencesAddedToToc = TRUE;
 
     private $zip;
 
@@ -74,11 +76,11 @@ class EPub {
     private $isFinalized = FALSE;
     private $isCoverImageSet = FALSE;
     private $buildTOC = FALSE;
-	private $tocTitle = NULL;
-	private $tocFileName = NULL;
-	private $tocCSSClass = NULL;
-	private $tocAddReferences = FALSE;
-	private $tocCssFileName = NULL;
+    private $tocTitle = NULL;
+    private $tocFileName = NULL;
+    private $tocCSSClass = NULL;
+    private $tocAddReferences = FALSE;
+    private $tocCssFileName = NULL;
 
     private $fileList = array();
     private $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT;
@@ -124,21 +126,25 @@ class EPub {
 
     private $forbiddenCharacters = array("?", "[", "]", "/", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", "%");
 
-	private $htmlContentHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title></title>\n</head>\n<body>\n";
-	private $htmlContentFooter = "</body>\n</html>\n";
+    private $htmlContentHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n<title></title>\n</head>\n<body>\n";
+    private $htmlContentFooter = "</body>\n</html>\n";
 
     /**
      * Class constructor.
      *
      * @return void
      */
-    function __construct($bookVersion = EPub::BOOK_VERSION_EPUB2, $languageCode = "en", $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
+    function __construct($bookVersion = EPub::BOOK_VERSION_EPUB2, $debugInside = FALSE, $languageCode = "en", $writingDirection = EPub::DIRECTION_LEFT_TO_RIGHT) {
         include_once("Zip.php");
-		include_once("Logger.php");
+        include_once("Logger.php");
 
-		$this->bookVersion = $bookVersion;
-		$this->writingDirection = $writingDirection;
-		$this->languageCode = $languageCode;
+        if (!$debugInside) {
+            error_reporting(E_ERROR | E_PARSE);
+        }
+
+        $this->bookVersion = $bookVersion;
+        $this->writingDirection = $writingDirection;
+        $this->languageCode = $languageCode;
 
         $this->log = new Logger("EPub", $this->isLogging);
 
@@ -169,45 +175,45 @@ class EPub {
      * @TODO make sure elements in the destructor match the current class elements
      */
     function __destruct() {
-		unset($this->bookVersion, $this->maxImageWidth, $this->maxImageHeight);
-		unset($this->splitDefaultSize, $this->isGifImagesEnabled, $this->isReferencesAddedToToc);
-		unset($this->zip, $this->title, $this->language, $this->identifier, $this->identifierType);
-		unset($this->description, $this->author, $this->authorSortKey, $this->publisherName);
-		unset($this->publisherURL, $this->date, $this->rights, $this->coverage, $this->relation);
-		unset($this->sourceURL, $this->chapterCount, $this->opf, $this->ncx, $this->isFinalized);
-		unset($this->isCoverImageSet, $this->fileList, $this->writingDirection, $this->languageCode);
-		unset($this->referencesOrder, $this->dateformat, $this->dateformatShort, $this->headerDateFormat);
-		unset($this->isCurlInstalled, $this->isGdInstalled, $this->isExifInstalled);
-		unset($this->isFileGetContentsInstalled, $this->isFileGetContentsExtInstalled, $this->bookRoot);
-		unset($this->docRoot, $this->EPubMark, $this->generator, $this->log, $this->isLogging);
-		unset($this->encodeHTML, $this->mimetypes, $this->coreMediaTypes, $this->opsContentTypes);
-		unset($this->forbiddenCharacters, $this->htmlContentHeader, $this->htmlContentFooter);
-		unset($this->buildTOC, $this->tocTitle, $this->tocCSSClass, $this->tocAddReferences);
-		unset($this->tocFileName, $this->tocCssFileName);
+        unset($this->bookVersion, $this->maxImageWidth, $this->maxImageHeight);
+        unset($this->splitDefaultSize, $this->isGifImagesEnabled, $this->isReferencesAddedToToc);
+        unset($this->zip, $this->title, $this->language, $this->identifier, $this->identifierType);
+        unset($this->description, $this->author, $this->authorSortKey, $this->publisherName);
+        unset($this->publisherURL, $this->date, $this->rights, $this->coverage, $this->relation);
+        unset($this->sourceURL, $this->chapterCount, $this->opf, $this->ncx, $this->isFinalized);
+        unset($this->isCoverImageSet, $this->fileList, $this->writingDirection, $this->languageCode);
+        unset($this->referencesOrder, $this->dateformat, $this->dateformatShort, $this->headerDateFormat);
+        unset($this->isCurlInstalled, $this->isGdInstalled, $this->isExifInstalled);
+        unset($this->isFileGetContentsInstalled, $this->isFileGetContentsExtInstalled, $this->bookRoot);
+        unset($this->docRoot, $this->EPubMark, $this->generator, $this->log, $this->isLogging);
+        unset($this->encodeHTML, $this->mimetypes, $this->coreMediaTypes, $this->opsContentTypes);
+        unset($this->forbiddenCharacters, $this->htmlContentHeader, $this->htmlContentFooter);
+        unset($this->buildTOC, $this->tocTitle, $this->tocCSSClass, $this->tocAddReferences);
+        unset($this->tocFileName, $this->tocCssFileName);
     }
 
-	/**
-	 * initialize defaults.
-	 */
+    /**
+     * initialize defaults.
+     */
     private function initialize() {
         $this->referencesOrder = array(
-			Reference::COVER => "Cover Page",
-			Reference::TITLE_PAGE => "Title Page",
-			Reference::ACKNOWLEDGEMENTS => "Acknowledgements",
-			Reference::BIBLIOGRAPHY => "Bibliography",
-			Reference::COLOPHON => "Colophon",
-			Reference::COPYRIGHT_PAGE => "Copyright",
-			Reference::DEDICATION => "Dedication",
-			Reference::EPIGRAPH => "Epigraph",
-			Reference::FOREWORD => "Foreword",
-			Reference::TABLE_OF_CONTENTS => "Table of Contents",
-			Reference::NOTES => "Notes",
-			Reference::PREFACE => "Preface",
-			Reference::TEXT => "First Page",
-			Reference::LIST_OF_ILLUSTRATIONS => "List of Illustrations",
-			Reference::LIST_OF_TABLES => "List of Tables",
-			Reference::GLOSSARY => "Glossary",
-			Reference::INDEX => "Index");
+            Reference::COVER => "Cover Page",
+            Reference::TITLE_PAGE => "Title Page",
+            Reference::ACKNOWLEDGEMENTS => "Acknowledgements",
+            Reference::BIBLIOGRAPHY => "Bibliography",
+            Reference::COLOPHON => "Colophon",
+            Reference::COPYRIGHT_PAGE => "Copyright",
+            Reference::DEDICATION => "Dedication",
+            Reference::EPIGRAPH => "Epigraph",
+            Reference::FOREWORD => "Foreword",
+            Reference::TABLE_OF_CONTENTS => "Table of Contents",
+            Reference::NOTES => "Notes",
+            Reference::PREFACE => "Preface",
+            Reference::TEXT => "First Page",
+            Reference::LIST_OF_ILLUSTRATIONS => "List of Illustrations",
+            Reference::LIST_OF_TABLES => "List of Tables",
+            Reference::GLOSSARY => "Glossary",
+            Reference::INDEX => "Index");
 
         $this->docRoot = filter_input(INPUT_SERVER, "DOCUMENT_ROOT") . "/";
 
@@ -225,29 +231,29 @@ class EPub {
 
         $this->content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">\n\t<rootfiles>\n\t\t<rootfile full-path=\"" . $this->bookRoot . "book.opf\" media-type=\"application/oebps-package+xml\" />\n\t</rootfiles>\n</container>\n";
 
-		if (!$this->isEPubVersion2()) {
-			$this->htmlContentHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-			. "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
-			. "<head>"
-			. "<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n"
-			. "<title></title>\n"
-			. "</head>\n"
-			. "<body>\n";
-		}
+        if (!$this->isEPubVersion2()) {
+            $this->htmlContentHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+            . "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
+            . "<head>"
+            . "<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n"
+            . "<title></title>\n"
+            . "</head>\n"
+            . "<body>\n";
+        }
 
         $this->zip->addFile($this->content, "META-INF/container.xml", 0, NULL, FALSE);
         $this->content = NULL;
         $this->ncx = new Ncx(NULL, NULL, NULL, $this->languageCode, $this->writingDirection);
         $this->opf = new Opf();
-		$this->ncx->setVersion($this->bookVersion);
-		$this->opf->setVersion($this->bookVersion);
+        $this->ncx->setVersion($this->bookVersion);
+        $this->opf->setVersion($this->bookVersion);
         $this->opf->addItem("ncx", "book.ncx", Ncx::MIMETYPE);
         $this->chapterCount = 0;
     }
 
     /**
      * Add dynamically generated data as a file to the book.
-	 *
+     *
      * @param string $fileName Filename to use for the file, must be unique for the book.
      * @param string $fileId Unique identifier for the file.
      * @param string $fileData File data
@@ -263,7 +269,7 @@ class EPub {
 
         $compress = (strpos($mimetype, "image/") !== 0);
 
-		$this->zip->addFile($fileData, $this->bookRoot.$fileName, 0, NULL, $compress);
+        $this->zip->addFile($fileData, $this->bookRoot.$fileName, 0, NULL, $compress);
         $this->fileList[$fileName] = $fileName;
         $this->opf->addItem($fileId, $fileName, $mimetype);
         return TRUE;
@@ -271,7 +277,7 @@ class EPub {
 
     /**
      * Add a large file directly from the filestystem to the book.
-	 *
+     *
      * @param string $fileName Filename to use for the file, must be unique for the book.
      * @param string $fileId Unique identifier for the file.
      * @param string $filePath File path
@@ -343,6 +349,7 @@ class EPub {
         }
         $fileName = Zip::getRelativePath($fileName);
         $fileName = preg_replace('#^[/\.]+#i', "", $fileName);
+        $fileName = $this->sanitizeFileName($fileName);
 
         $chapter = $chapterData;
         if ($autoSplit && is_string($chapterData) && mb_strlen($chapterData) > $this->splitDefaultSize) {
@@ -391,13 +398,13 @@ class EPub {
                     $this->processChapterExternalReferences($v, $externalReferences, $baseDir);
                 }
                 $partCount++;
-				$partName = $name . "_" . $partCount;
+                $partName = $name . "_" . $partCount;
                 $this->addFile($partName . "." . $extension, $partName, $v, "application/xhtml+xml");
                 $this->opf->addItemRef($partName);
 
                 $oneChapter = each($chapter);
             }
-			$partName = $name . "_1." . $extension;
+            $partName = $name . "_1." . $extension;
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $partName, $partName);
             $this->ncx->addNavPoint($navPoint);
 
@@ -409,71 +416,71 @@ class EPub {
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
             $this->ncx->addNavPoint($navPoint);
             $this->ncx->chapterList[$chapterName] = $navPoint;
-		} else if (!isset($chapterData) && $fileName=="TOC.xhtml") {
+        } else if (!isset($chapterData) && $fileName=="TOC.xhtml") {
             $this->chapterCount++;
             $this->opf->addItemRef("toc");
 
             $navPoint = new NavPoint($this->decodeHtmlEntities($chapterName), $fileName, "chapter" . $this->chapterCount);
             $this->ncx->addNavPoint($navPoint);
             $this->ncx->chapterList[$chapterName] = $navPoint;
-		}
+        }
         return $navPoint;
     }
 
-	/**
-	 * Add one chapter level.
-	 *
-	 * Subsequent chapters will be added to this level.
-	 *
-	 * @param string $navTitle
-	 * @param string $navId
-	 * @param string $navClass
-	 * @param int    $isNavHidden
-	 * @param string $writingDirection
-	 * @return NavPoint The new NavPoint for that level.
-	 */
-	function subLevel($navTitle = NULL, $navId = NULL, $navClass = NULL, $isNavHidden = FALSE, $writingDirection = NULL) {
-		return $this->ncx->subLevel($this->decodeHtmlEntities($navTitle), $navId, $navClass, $isNavHidden, $writingDirection);
-	}
+    /**
+     * Add one chapter level.
+     *
+     * Subsequent chapters will be added to this level.
+     *
+     * @param string $navTitle
+     * @param string $navId
+     * @param string $navClass
+     * @param int    $isNavHidden
+     * @param string $writingDirection
+     * @return NavPoint The new NavPoint for that level.
+     */
+    function subLevel($navTitle = NULL, $navId = NULL, $navClass = NULL, $isNavHidden = FALSE, $writingDirection = NULL) {
+        return $this->ncx->subLevel($this->decodeHtmlEntities($navTitle), $navId, $navClass, $isNavHidden, $writingDirection);
+    }
 
-	/**
-	 * Step back one chapter level.
-	 *
-	 * Subsequent chapters will be added to this chapters parent level.
-	 */
-	function backLevel() {
-		$this->ncx->backLevel();
-	}
+    /**
+     * Step back one chapter level.
+     *
+     * Subsequent chapters will be added to this chapters parent level.
+     */
+    function backLevel() {
+        $this->ncx->backLevel();
+    }
 
-	/**
-	 * Step back to the root level.
-	 *
-	 * Subsequent chapters will be added to the rooot NavMap.
-	 */
-	function rootLevel() {
-		$this->ncx->rootLevel();
-	}
+    /**
+     * Step back to the root level.
+     *
+     * Subsequent chapters will be added to the rooot NavMap.
+     */
+    function rootLevel() {
+        $this->ncx->rootLevel();
+    }
 
-	/**
-	 * Step back to the given level.
-	 * Useful for returning to a previous level from deep within the structure.
-	 * Values below 2 will have the same effect as rootLevel()
-	 *
-	 * @param int $newLevel
-	 */
-	function setCurrentLevel($newLevel) {
-		$this->ncx->setCurrentLevel($newLevel);
-	}
+    /**
+     * Step back to the given level.
+     * Useful for returning to a previous level from deep within the structure.
+     * Values below 2 will have the same effect as rootLevel()
+     *
+     * @param int $newLevel
+     */
+    function setCurrentLevel($newLevel) {
+        $this->ncx->setCurrentLevel($newLevel);
+    }
 
-	/**
-	 * Get current level count.
-	 * The indentation of the current structure point.
-	 *
-	 * @return current level count;
-	 */
-	function getCurrentLevel() {
-		return $this->ncx->getCurrentLevel();
-	}
+    /**
+     * Get current level count.
+     * The indentation of the current structure point.
+     *
+     * @return current level count;
+     */
+    function getCurrentLevel() {
+        return $this->ncx->getCurrentLevel();
+    }
 
     /**
      * Wrap ChapterContent with Head and Footer
@@ -485,7 +492,7 @@ class EPub {
         return $this->htmlContentHeader . "\n" . $content . "\n" . $this->htmlContentFooter;
     }
 
-	/**
+    /**
      * Reference pages is usually one or two pages for items such as Table of Contents, reference lists, Author notes or Acknowledgements.
      * These do not show up in the regular navigation list.
      *
@@ -508,10 +515,10 @@ class EPub {
 
 
         if (!empty($pageData) && is_string($pageData)) {
-			if ($this->encodeHTML === TRUE) {
-				$pageData = $this->encodeHtml($pageData);
-			}
-			
+            if ($this->encodeHTML === TRUE) {
+                $pageData = $this->encodeHtml($pageData);
+            }
+            
             $this->wrapChapter($pageData);
 
             if ($externalReferences !== EPub::EXTERNAL_REF_IGNORE) {
@@ -521,45 +528,45 @@ class EPub {
             }
 
             $this->addFile($fileName, "ref_" . $reference, $pageData, "application/xhtml+xml");
-			
-			if ($reference !== Reference::TABLE_OF_CONTENTS || !isset($this->ncx->referencesList[$reference])) {
-				$this->opf->addItemRef("ref_" . $reference, FALSE);
-				$this->opf->addReference($reference, $pageName, $fileName);
+            
+            if ($reference !== Reference::TABLE_OF_CONTENTS || !isset($this->ncx->referencesList[$reference])) {
+                $this->opf->addItemRef("ref_" . $reference, FALSE);
+                $this->opf->addReference($reference, $pageName, $fileName);
 
-				$this->ncx->referencesList[$reference] = $fileName;
-				$this->ncx->referencesName[$reference] = $pageName;
-			}
-			return TRUE;
-		}
-		return TRUE;
+                $this->ncx->referencesList[$reference] = $fileName;
+                $this->ncx->referencesName[$reference] = $pageName;
+            }
+            return TRUE;
+        }
+        return TRUE;
     }
 
-	/**
+    /**
      * Add custom metadata to the book.
-	 *
-	 * It is up to the builder to make sure there are no collisions. Metadata are just key value pairs.
+     *
+     * It is up to the builder to make sure there are no collisions. Metadata are just key value pairs.
      *
      * @param string $name
      * @param string $content
      */
-	function addCustomMetadata($name, $content) {
-		$this->opf->addMeta($name, $content);
-	}
+    function addCustomMetadata($name, $content) {
+        $this->opf->addMeta($name, $content);
+    }
 
     /**
-	 * Add DublinCore metadata to the book
-	 *
-	 * Use the DublinCore constants included in EPub, ie DublinCore::DATE
-	 *
-	 * @param string $dublinCore name
-	 * @param string $value
-	 */
+     * Add DublinCore metadata to the book
+     *
+     * Use the DublinCore constants included in EPub, ie DublinCore::DATE
+     *
+     * @param string $dublinCore name
+     * @param string $value
+     */
     function addDublinCoreMetadata($dublinCoreConstant, $value) {
         if ($this->isFinalized) {
             return;
         }
 
-		$this->opf->addDCMeta($dublinCoreConstant, $this->decodeHtmlEntities($value));
+        $this->opf->addDCMeta($dublinCoreConstant, $this->decodeHtmlEntities($value));
     }
 
     /**
@@ -573,7 +580,7 @@ class EPub {
      * @param string $mimetype Image mimetype, such as "image/jpeg" or "image/png".
      * @return bool $success
      */
-    function setCoverImage($fileName, $imageData = NULL, $mimetype = NULL) {
+    function setCoverImage($fileName, $imageData = NULL, $mimetype = NULL,$bookTitle) {
         if ($this->isFinalized || $this->isCoverImageSet || array_key_exists("CoverPage.html", $this->fileList)) {
             return FALSE;
         }
@@ -590,7 +597,7 @@ class EPub {
                 }
             }
             $image = $this->getImage($fileName);
-			$imageData = $image['image'];
+            $imageData = $image['image'];
             $mimetype = $image['mime'];
             $fileName = preg_replace("#\.[^\.]+$#", "." . $image['ext'], $fileName);
         }
@@ -611,49 +618,51 @@ class EPub {
             $mimetype = "image/" . $ext;
         }
 
-		$coverPage = "";
+        $coverPage = "";
 
-		if ($this->isEPubVersion2()) {
-			$coverPage = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				. "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
-				. "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
-				. "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\" xml:lang=\"en\">\n"
-				. "\t<head>\n"
-				. "\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n"
-				. "\t\t<title>Cover Image</title>\n"
-				. "\t\t<link type=\"text/css\" rel=\"stylesheet\" href=\"Styles/CoverPage.css\" />\n"
-				. "\t</head>\n"
-				. "\t<body>\n"
-				. "\t\t<div>\n"
-				. "\t\t\t<img src=\"" . $imgPath . "\" alt=\"Cover image\" style=\"height: 100%\"/>\n"
-				. "\t\t</div>\n"
-				. "\t</body>\n"
-				. "</html>\n";
-		} else {
-		    $coverPage = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				. "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
-				. "<head>"
-				. "\t<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n"
-				. "\t\t<title>Cover Image</title>\n"
-				. "\t\t<link type=\"text/css\" rel=\"stylesheet\" href=\"Styles/CoverPage.css\" />\n"
-				. "\t</head>\n"
-				. "\t<body>\n"
-				. "\t\t<section epub:type=\"cover\">\n"
-				. "\t\t\t<img src=\"" . $imgPath . "\" alt=\"Cover image\" style=\"height: 100%\"/>\n"
-				. "\t\t</section>\n"
-				. "\t</body>\n"
-				. "</html>\n";
-		}
-		$coverPageCss = "@page, body, div, img {\n"
-				. "\tpadding: 0pt;\n"
-				. "\tmargin:0pt;\n"
-				. "}\n\nbody {\n"
-				. "\ttext-align: center;\n"
-				. "}\n";
+        if ($this->isEPubVersion2()) {
+            $coverPage = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                . "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+                . "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+                . "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\" xml:lang=\"en\">\n"
+                . "\t<head>\n"
+                . "\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>\n"
+                . "\t\t<title>Cover Image</title>\n"
+                . "\t\t<link type=\"text/css\" rel=\"stylesheet\" href=\"Styles/CoverPage.css\" />\n"
+                . "\t</head>\n"
+                . "\t<body>\n"
+                . "\t" . $bookTitle . "\n"
+                . "\t\t<div>\n"
+                . "\t\t\t<img src=\"" . $imgPath . "\" alt=\"Cover image\" style=\"height: 100%\"/>\n"
+                . "\t\t</div>\n"
+                . "\t</body>\n"
+                . "</html>\n";
+        } else {
+            $coverPage = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                . "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
+                . "<head>"
+                . "\t<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n"
+                . "\t\t<title>Cover Image</title>\n"
+                . "\t\t<link type=\"text/css\" rel=\"stylesheet\" href=\"Styles/CoverPage.css\" />\n"
+                . "\t</head>\n"
+                . "\t<body>\n"
+                . "\t\t<section epub:type=\"cover\">\n"
+                . "\t" . $bookTitle . "\n"
+                . "\t\t\t<img src=\"" . $imgPath . "\" alt=\"Cover image\" style=\"height: 30%\"/>\n"
+                . "\t\t</section>\n"
+                . "\t</body>\n"
+                . "</html>\n";
+        }
+        $coverPageCss = "@page, body, div, img {\n"
+                . "\tpadding: 0pt;\n"
+                . "\tmargin:0pt;\n"
+                . "}\n\nbody {\n"
+                . "\ttext-align: center;\n"
+                . "}\n";
 
-		$this->addCSSFile("Styles/CoverPage.css", "CoverPageCss", $coverPageCss);
+        $this->addCSSFile("Styles/CoverPage.css", "CoverPageCss", $coverPageCss);
         $this->addFile($imgPath, "CoverImage", $imageData, $mimetype);
-		$this->addReferencePage("CoverPage", "CoverPage.xhtml", $coverPage, "cover");
+        $this->addReferencePage("CoverPage", "CoverPage.xhtml", $coverPage, "cover");
         $this->isCoverImageSet = TRUE;
         return TRUE;
     }
@@ -710,15 +719,15 @@ class EPub {
             $headNode = $xmlDoc->getElementsByTagName("head");
             $bodyNode = $xmlDoc->getElementsByTagName("body");
 
-			$htmlNS = "";
-			for ($index = 0; $index < $htmlNode->item(0)->attributes->length; $index++) {
-				$nodeName = $htmlNode->item(0)->attributes->item($index)->nodeName;
-				$nodeValue = $htmlNode->item(0)->attributes->item($index)->nodeValue;
+            $htmlNS = "";
+            for ($index = 0; $index < $htmlNode->item(0)->attributes->length; $index++) {
+                $nodeName = $htmlNode->item(0)->attributes->item($index)->nodeName;
+                $nodeValue = $htmlNode->item(0)->attributes->item($index)->nodeValue;
 
-				if ($nodeName != "xmlns") {
-					$htmlNS .= " $nodeName=\"$nodeValue\"";
-				}
-			}
+                if ($nodeName != "xmlns") {
+                    $htmlNS .= " $nodeName=\"$nodeValue\"";
+                }
+            }
 
             $xml = new DOMDocument('1.0', "utf-8");
             $xml->lookupPrefix("http://www.w3.org/1999/xhtml");
@@ -736,11 +745,11 @@ class EPub {
             $xml->loadXML($xml2Doc->saveXML());
             $doc = $xml->saveXML();
 
-			if (!$this->isEPubVersion2()) {
-				$doc = preg_replace('#^\s*<!DOCTYPE\ .+?>\s*#im', '', $doc);
-			}
+            if (!$this->isEPubVersion2()) {
+                $doc = preg_replace('#^\s*<!DOCTYPE\ .+?>\s*#im', '', $doc);
+            }
         }
-		return TRUE;
+        return TRUE;
     }
 
     /**
@@ -899,18 +908,18 @@ class EPub {
         $postProcDomElememts = array();
         $images = $xmlDoc->getElementsByTagName("img");
         $itemCount = $images->length;
-		
+        
         for ($idx = 0; $idx < $itemCount; $idx++) {
             $img = $images->item($idx);
 
-			if ($externalReferences === EPub::EXTERNAL_REF_REMOVE_IMAGES) {
+            if ($externalReferences === EPub::EXTERNAL_REF_REMOVE_IMAGES) {
                 $postProcDomElememts[] = $img;
             } else if ($externalReferences === EPub::EXTERNAL_REF_REPLACE_IMAGES) {
                 $altNode = $img->attributes->getNamedItem("alt");
-				$alt = "image";
-				if ($altNode !== NULL && strlen($altNode->nodeValue) > 0) {
-					$alt = $altNode->nodeValue;
-				}
+                $alt = "image";
+                if ($altNode !== NULL && strlen($altNode->nodeValue) > 0) {
+                    $alt = $altNode->nodeValue;
+                }
                 $postProcDomElememts[] = array($img, $this->createDomFragment($xmlDoc, "<em>[" . $alt . "]</em>"));
             } else {
                 $source = $img->attributes->getNamedItem("src")->nodeValue;
@@ -937,7 +946,7 @@ class EPub {
         }
         return TRUE;
     }
-	
+    
     /**
      * Process source tags in a DOMDocument.
      * $externalReferences will determine what will happen to these images, and the img src will be rewritten accordingly.
@@ -950,46 +959,46 @@ class EPub {
      *
      * @return bool  FALSE if uncuccessful (book is finalized or $externalReferences == EXTERNAL_REF_IGNORE).
      */
-	protected function processChapterSources(&$xmlDoc, $externalReferences = EPub::EXTERNAL_REF_ADD, $baseDir = "", $htmlDir = "", $backPath = "") {
-		if ($this->isFinalized || $externalReferences === EPub::EXTERNAL_REF_IGNORE) {
-			return FALSE;
-		}
+    protected function processChapterSources(&$xmlDoc, $externalReferences = EPub::EXTERNAL_REF_ADD, $baseDir = "", $htmlDir = "", $backPath = "") {
+        if ($this->isFinalized || $externalReferences === EPub::EXTERNAL_REF_IGNORE) {
+            return FALSE;
+        }
 
-		if ($this->bookVersion !== EPub::BOOK_VERSION_EPUB3) {
-			// ePub 2 does not support multimedia formats, and they must be removed.
-			$externalReferences = EPub::EXTERNAL_REF_REMOVE_IMAGES;
-		}
-		
-		$postProcDomElememts = array();
-		$images = $xmlDoc->getElementsByTagName("source");
-		$itemCount = $images->length;
-		for ($idx = 0; $idx < $itemCount; $idx++) {
-			$img = $images->item($idx);
-			if ($externalReferences === EPub::EXTERNAL_REF_REMOVE_IMAGES) {
-				$postProcDomElememts[] = $img;
-			} else if ($externalReferences === EPub::EXTERNAL_REF_REPLACE_IMAGES) {
-				$altNode = $img->attributes->getNamedItem("alt");
-				$alt = "image";
-				if ($altNode !== NULL && strlen($altNode->nodeValue) > 0) {
-					$alt = $altNode->nodeValue;
-				}
-				$postProcDomElememts[] = array($img, $this->createDomFragment($xmlDoc, "[" . $alt . "]"));
-			} else {
-				$source = $img->attributes->getNamedItem("src")->nodeValue;
+        if ($this->bookVersion !== EPub::BOOK_VERSION_EPUB3) {
+            // ePub 2 does not support multimedia formats, and they must be removed.
+            $externalReferences = EPub::EXTERNAL_REF_REMOVE_IMAGES;
+        }
+        
+        $postProcDomElememts = array();
+        $images = $xmlDoc->getElementsByTagName("source");
+        $itemCount = $images->length;
+        for ($idx = 0; $idx < $itemCount; $idx++) {
+            $img = $images->item($idx);
+            if ($externalReferences === EPub::EXTERNAL_REF_REMOVE_IMAGES) {
+                $postProcDomElememts[] = $img;
+            } else if ($externalReferences === EPub::EXTERNAL_REF_REPLACE_IMAGES) {
+                $altNode = $img->attributes->getNamedItem("alt");
+                $alt = "image";
+                if ($altNode !== NULL && strlen($altNode->nodeValue) > 0) {
+                    $alt = $altNode->nodeValue;
+                }
+                $postProcDomElememts[] = array($img, $this->createDomFragment($xmlDoc, "[" . $alt . "]"));
+            } else {
+                $source = $img->attributes->getNamedItem("src")->nodeValue;
 
-				$parsedSource = parse_url($source);
-				$internalSrc = $this->sanitizeFileName(urldecode(pathinfo($parsedSource['path'], PATHINFO_BASENAME)));
-				$internalPath = "";
-				$isSourceExternal = FALSE;
+                $parsedSource = parse_url($source);
+                $internalSrc = $this->sanitizeFileName(urldecode(pathinfo($parsedSource['path'], PATHINFO_BASENAME)));
+                $internalPath = "";
+                $isSourceExternal = FALSE;
 
-				if ($this->resolveMedia($source, $internalPath, $internalSrc, $isSourceExternal, $baseDir, $htmlDir, $backPath)) {
-					$img->setAttribute("src", $backPath . $internalPath);
-				} else if ($isSourceExternal) {
-					$postProcDomElememts[] = $img; // External image is missing
-				} // else do nothing, if the image is local, and missing, assume it's been generated.
-			}
-		}
-	}
+                if ($this->resolveMedia($source, $internalPath, $internalSrc, $isSourceExternal, $baseDir, $htmlDir, $backPath)) {
+                    $img->setAttribute("src", $backPath . $internalPath);
+                } else if ($isSourceExternal) {
+                    $postProcDomElememts[] = $img; // External image is missing
+                } // else do nothing, if the image is local, and missing, assume it's been generated.
+            }
+        }
+    }
 
     /**
      * Resolve an image src and determine it's target location and add it to the book.
@@ -1007,10 +1016,10 @@ class EPub {
             return FALSE;
         }
         $imageData  = NULL;
-		
+        
         if (preg_match('#^(http|ftp)s?://#i', $source) == 1) {
             $urlinfo = parse_url($source);
-			$urlPath = pathinfo($urlinfo['path']);
+            $urlPath = pathinfo($urlinfo['path']);
 
             if (strpos($urlinfo['path'], $baseDir."/") !== FALSE) {
                 $internalSrc = $this->sanitizeFileName(urldecode(substr($urlinfo['path'], strpos($urlinfo['path'], $baseDir."/") + strlen($baseDir) + 1)));
@@ -1021,27 +1030,27 @@ class EPub {
         } else if (strpos($source, "/") === 0) {
             $internalPath = pathinfo($source, PATHINFO_DIRNAME);
 
-			$path = $source;
-			if (!file_exists($path)) {
-				$path = $this->docRoot . $path;
-			}
+            $path = $source;
+            if (!file_exists($path)) {
+                $path = $this->docRoot . $path;
+            }
 
-			$imageData = $this->getImage($path);
+            $imageData = $this->getImage($path);
         } else {
             $internalPath = $htmlDir . "/" . preg_replace('#^[/\.]+#', '', pathinfo($source, PATHINFO_DIRNAME));
-			
-			$path = $baseDir . "/" . $source;
-			if (!file_exists($path)) {
-				$path = $this->docRoot . $path;
-			}
-			
+            
+            $path = $baseDir . "/" . $source;
+            if (!file_exists($path)) {
+                $path = $this->docRoot . $path;
+            }
+            
             $imageData = $this->getImage($path);
         }
         if ($imageData !== FALSE) {
-			$iSrcInfo = pathinfo($internalSrc);
-			if (!empty($imageData['ext']) && $imageData['ext'] != $iSrcInfo['extension']) {
-				$internalSrc = $iSrcInfo['filename'] . "." . $imageData['ext'];
-    		}
+            $iSrcInfo = pathinfo($internalSrc);
+            if (!empty($imageData['ext']) && $imageData['ext'] != $iSrcInfo['extension']) {
+                $internalSrc = $iSrcInfo['filename'] . "." . $imageData['ext'];
+            }
             $internalPath = Zip::getRelativePath("images/" . $internalPath . "/" . $internalSrc);
         if (!array_key_exists($internalPath, $this->fileList)) {
                 $this->addFile($internalPath, "i_" . $internalSrc, $imageData['image'], $imageData['mime']);
@@ -1068,7 +1077,7 @@ class EPub {
             return FALSE;
         }
         $mediaPath = NULL;
-		$tmpFile;
+        $tmpFile;
 
         if (preg_match('#^(http|ftp)s?://#i', $source) == 1) {
             $urlinfo = parse_url($source);
@@ -1079,34 +1088,34 @@ class EPub {
             $internalPath = $urlinfo["scheme"] . "/" . $urlinfo["host"] . "/" . pathinfo($urlinfo["path"], PATHINFO_DIRNAME);
             $isSourceExternal = TRUE;
             $mediaPath = $this->getFileContents($source, true);
-			$tmpFile = $mediaPath;
-		} else if (strpos($source, "/") === 0) {
+            $tmpFile = $mediaPath;
+        } else if (strpos($source, "/") === 0) {
             $internalPath = pathinfo($source, PATHINFO_DIRNAME);
-			
-			$mediaPath = $source;
-			if (!file_exists($mediaPath)) {
-				$mediaPath = $this->docRoot . $mediaPath;
-			}
+            
+            $mediaPath = $source;
+            if (!file_exists($mediaPath)) {
+                $mediaPath = $this->docRoot . $mediaPath;
+            }
         } else {
             $internalPath = $htmlDir . "/" . preg_replace('#^[/\.]+#', '', pathinfo($source, PATHINFO_DIRNAME));
-			
-			$mediaPath = $baseDir . "/" . $source;
-			if (!file_exists($mediaPath)) {
-				$mediaPath = $this->docRoot . $mediaPath;
-			}
+            
+            $mediaPath = $baseDir . "/" . $source;
+            if (!file_exists($mediaPath)) {
+                $mediaPath = $this->docRoot . $mediaPath;
+            }
         }
 
         if ($mediaPath !== FALSE) {
             $mime = $this->getMime($source);
             $internalPath = Zip::getRelativePath("media/" . $internalPath . "/" . $internalSrc);
-			
+            
             if (!array_key_exists($internalPath, $this->fileList) &&
-					$this->addLargeFile($internalPath, "m_" . $internalSrc, $mediaPath, $mime)) {
+                    $this->addLargeFile($internalPath, "m_" . $internalSrc, $mediaPath, $mime)) {
                 $this->fileList[$internalPath] = $source;
             }
-			if (isset($tmpFile)) {
-				unlink($tmpFile);
-			}
+            if (isset($tmpFile)) {
+                unlink($tmpFile);
+            }
             return TRUE;
         }
         return FALSE;
@@ -1431,10 +1440,10 @@ class EPub {
         if ($this->isFinalized) {
             return;
         }
-		$this->opf->addDCMeta(DublinCore::SUBJECT, $this->decodeHtmlEntities($subject));
+        $this->opf->addDCMeta(DublinCore::SUBJECT, $this->decodeHtmlEntities($subject));
     }
 
-	/**
+    /**
      * Book source URL, optional.
      *
      * A related resource from which the described resource is derived.
@@ -1484,8 +1493,8 @@ class EPub {
      *
      * Used for the dc:coverage metadata parameter in the OPF file
      *
-	 * Same as ->addDublinCoreMetadata(DublinCore::COVERAGE, $coverage);
-	 *
+     * Same as ->addDublinCoreMetadata(DublinCore::COVERAGE, $coverage);
+     *
      * @param string $coverage
      * @access public
      * @return bool $success
@@ -1583,38 +1592,38 @@ class EPub {
         die ("Function was deprecated, functionality is no longer needed.");
     }
 
-	/**
-	 * Set the references title for the ePub 3 landmarks section
-	 *
-	 * @param string $referencesTitle
-	 * @param string $referencesId
-	 * @param string $referencesClass
-	 * @return bool
-	 */
-	function setReferencesTitle($referencesTitle = "Guide", $referencesId = "", $referencesClass = "references") {
+    /**
+     * Set the references title for the ePub 3 landmarks section
+     *
+     * @param string $referencesTitle
+     * @param string $referencesId
+     * @param string $referencesClass
+     * @return bool
+     */
+    function setReferencesTitle($referencesTitle = "Guide", $referencesId = "", $referencesClass = "references") {
         if ($this->isFinalized) {
             return FALSE;
         }
-		$this->ncx->referencesTitle = is_string($referencesTitle) ? trim($referencesTitle) : "Guide";
-		$this->ncx->referencesId = is_string($referencesId) ? trim($referencesId) : "references";
-		$this->ncx->referencesClass = is_string($referencesClass) ? trim($referencesClass) : "references";
-		return TRUE;
-	}
+        $this->ncx->referencesTitle = is_string($referencesTitle) ? trim($referencesTitle) : "Guide";
+        $this->ncx->referencesId = is_string($referencesId) ? trim($referencesId) : "references";
+        $this->ncx->referencesClass = is_string($referencesClass) ? trim($referencesClass) : "references";
+        return TRUE;
+    }
 
-	/**
-	 * Set the references title for the ePub 3 landmarks section
-	 *
-	 * @param bool $referencesTitle
-	 */
-	function setisReferencesAddedToToc($isReferencesAddedToToc = TRUE) {
+    /**
+     * Set the references title for the ePub 3 landmarks section
+     *
+     * @param bool $referencesTitle
+     */
+    function setisReferencesAddedToToc($isReferencesAddedToToc = TRUE) {
         if ($this->isFinalized) {
             return FALSE;
         }
-		$this->isReferencesAddedToToc = $isReferencesAddedToToc === TRUE;
-		return TRUE;
-	}
+        $this->isReferencesAddedToToc = $isReferencesAddedToToc === TRUE;
+        return TRUE;
+    }
 
-	/**
+    /**
      * Get Book status.
      *
      * @access public
@@ -1631,35 +1640,35 @@ class EPub {
      * @param string $tocCSSClass The TOC is a <div>, if you need special formatting, you can add a css class for that div. Default is "toc".
      * @param string $title Title of the Table of contents. Default is "Table of Contents". Use this for ie. languages other than English.
      * @param bool   $addReferences include reference pages in the TOC, using the $referencesOrder array to determine the order of the pages in the TOC. Default is TRUE.
-	 * @param bool   $addToIndex Add the TOC to the NCX index at the current leve/position. Default is FALSE
-	 * @param string $tocFileName Change teh default name of the TOC file. The default is "TOC.xhtml"
+     * @param bool   $addToIndex Add the TOC to the NCX index at the current leve/position. Default is FALSE
+     * @param string $tocFileName Change teh default name of the TOC file. The default is "TOC.xhtml"
      */
     function buildTOC($cssFileName = NULL, $tocCSSClass = "toc", $title = "Table of Contents", $addReferences = TRUE, $addToIndex = FALSE, $tocFileName = "TOC.xhtml") {
         if ($this->isFinalized) {
             return FALSE;
         }
-		$this->buildTOC = TRUE;
-		$this->tocTitle = $title;
-		$this->tocFileName = $this->normalizeFileName($tocFileName);
-		if (!empty($cssFileName)) {
-			$this->tocCssFileName = $this->normalizeFileName($cssFileName);
-		}
-		$this->tocCSSClass = $tocCSSClass;
-		$this->tocAddReferences = $addReferences;
+        $this->buildTOC = TRUE;
+        $this->tocTitle = $title;
+        $this->tocFileName = $this->normalizeFileName($tocFileName);
+        if (!empty($cssFileName)) {
+            $this->tocCSSFileName = $this->normalizeFileName($cssFileName);
+        }
+        $this->tocCSSClass = $tocCSSClass;
+        $this->tocAddReferences = $addReferences;
 
-		$this->opf->addItemRef("ref_" . Reference::TABLE_OF_CONTENTS, FALSE);
-		$this->opf->addReference(Reference::TABLE_OF_CONTENTS, $title, $this->tocFileName);
+        $this->opf->addItemRef("ref_" . Reference::TABLE_OF_CONTENTS, FALSE);
+        $this->opf->addReference(Reference::TABLE_OF_CONTENTS, $title, $this->tocFileName);
 
-		if ($addToIndex) {
+        if ($addToIndex) {
             $navPoint = new NavPoint($this->decodeHtmlEntities($title), $this->tocFileName, "ref_" . Reference::TABLE_OF_CONTENTS);
             $this->ncx->addNavPoint($navPoint);
-		} else {
-			$this->ncx->referencesList[Reference::TABLE_OF_CONTENTS] = $this->tocFileName;
-			$this->ncx->referencesName[Reference::TABLE_OF_CONTENTS] = $title;
-		}
-	}
-	
-	private function finalizeTOC() {
+        } else {
+            $this->ncx->referencesList[Reference::TABLE_OF_CONTENTS] = $this->tocFileName;
+            $this->ncx->referencesName[Reference::TABLE_OF_CONTENTS] = $title;
+        }
+    }
+    
+    private function finalizeTOC() {
         if (!$this->buildTOC) {
             return FALSE;
         }
@@ -1668,23 +1677,23 @@ class EPub {
             $this->tocTitle = "Table of Contents";
         }
 
-		$tocData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+        $tocData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 
-		if ($this->isEPubVersion2()) {
-			$tocData .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
-			. "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
-			. "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
-		    . "<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n";
-		} else {
-			$tocData .= "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
-		    . "<head>\n<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n";
-		}
+        if ($this->isEPubVersion2()) {
+            $tocData .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+            . "    \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+            . "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+            . "<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n";
+        } else {
+            $tocData .= "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\">\n"
+            . "<head>\n<meta http-equiv=\"Default-Style\" content=\"text/html; charset=utf-8\" />\n";
+        }
 
         if (!empty($this->tocCssFileName)) {
             $tocData .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"" . $this->tocCssFileName . "\" />\n";
         }
 
-		$tocData .= "<title>" . $this->tocTitle . "</title>\n"
+        $tocData .= "<title>" . $this->tocTitle . "</title>\n"
         . "</head>\n"
         . "<body>\n"
         . "<h3>" . $this->tocTitle . "</h3>\n<div";
@@ -1697,9 +1706,9 @@ class EPub {
         while (list($item, $descriptive) = each($this->referencesOrder)) {
             if ($item === "text") {
                 while (list($chapterName, $navPoint) = each($this->ncx->chapterList)) {
-					$fileName = $navPoint->getContentSrc();
-					$level = $navPoint->getLevel() -2;
-					$tocData .= "\t<p>" . str_repeat(" &#160;  &#160;  &#160;", $level) . "<a href=\"" . $fileName . "\">" . $chapterName . "</a></p>\n";
+                    $fileName = $navPoint->getContentSrc();
+                    $level = $navPoint->getLevel() -2;
+                    $tocData .= "\t<p>" . str_repeat(" &#160;  &#160;  &#160;", $level) . "<a href=\"" . $this->sanitizeFileName($fileName) . "\">" . $chapterName . "</a></p>\n";
                 }
             } else if ($this->tocAddReferences === TRUE) {
                 if (array_key_exists($item, $this->ncx->referencesList)) {
@@ -1713,35 +1722,35 @@ class EPub {
         }
         $tocData .= "</div>\n</body>\n</html>\n";
 
-		$this->addReferencePage($this->tocTitle, $this->tocFileName, $tocData, Reference::TABLE_OF_CONTENTS);
-		
+        $this->addReferencePage($this->tocTitle, $this->tocFileName, $tocData, Reference::TABLE_OF_CONTENTS);
+        
     }
 
-	/**
-	 * @return bool
-	 */
-	function isEPubVersion2() {
-		return $this->bookVersion === EPub::BOOK_VERSION_EPUB2;
-	}
+    /**
+     * @return bool
+     */
+    function isEPubVersion2() {
+        return $this->bookVersion === EPub::BOOK_VERSION_EPUB2;
+    }
 
-	/**
-	 * @param string $cssFileName
-	 * @param string $title
-	 * @return string
-	 */
-	function buildEPub3TOC($cssFileName = NULL, $title = "Table of Contents") {
-		$this->ncx->referencesOrder = $this->referencesOrder;
-		$this->ncx->setDocTitle($this->decodeHtmlEntities($this->title));
-		return $this->ncx->finalizeEPub3($title, $cssFileName);
-	}
+    /**
+     * @param string $cssFileName
+     * @param string $title
+     * @return string
+     */
+    function buildEPub3TOC($cssFileName = NULL, $title = "Table of Contents") {
+        $this->ncx->referencesOrder = $this->referencesOrder;
+        $this->ncx->setDocTitle($this->decodeHtmlEntities($this->title));
+        return $this->ncx->finalizeEPub3($title, $cssFileName);
+    }
 
-	/**
-	 * @param string $fileName
-	 * @param string $tocData
-	 * @return bool
-	 */
-	function addEPub3TOC($fileName, $tocData) {
-		if ($this->isEPubVersion2() || $this->isFinalized || array_key_exists($fileName, $this->fileList)) {
+    /**
+     * @param string $fileName
+     * @param string $tocData
+     * @return bool
+     */
+    function addEPub3TOC($fileName, $tocData) {
+        if ($this->isEPubVersion2() || $this->isFinalized || array_key_exists($fileName, $this->fileList)) {
             return FALSE;
         }
         $fileName = Zip::getRelativePath($fileName);
@@ -1752,9 +1761,9 @@ class EPub {
         $this->fileList[$fileName] = $fileName;
         $this->opf->addItem("toc", $fileName, "application/xhtml+xml", "nav");
         return TRUE;
-	}
+    }
 
-	/**
+    /**
      * Check for mandatory parameters and finalize the e-book.
      * Once finalized, the book is locked for further additions.
      *
@@ -1784,7 +1793,7 @@ class EPub {
         // Generate OPF data:
         $this->opf->setIdent("BookId");
         $this->opf->initialize($this->title, $this->language, $this->identifier, $this->identifierType);
-		
+        
         $DCdate = new DublinCore(DublinCore::DATE, gmdate($this->dateformat, $this->date));
         $DCdate->addOpfAttr("event", "publication");
         $this->opf->metadata->addDublinCore($DCdate);
@@ -1802,7 +1811,7 @@ class EPub {
         }
 
         if (!empty($this->author)) {
-			$author = $this->decodeHtmlEntities($this->author);
+            $author = $this->decodeHtmlEntities($this->author);
             $this->opf->addCreator($author, $this->decodeHtmlEntities($this->authorSortKey), MarcCode::AUTHOR);
             $this->ncx->setDocAuthor($author);
         }
@@ -1824,11 +1833,11 @@ class EPub {
         }
 
         if ($this->isCoverImageSet) {
-            $this->opf->addMeta("cover", "CoverImage");
+            $this->opf->addMeta("cover", "coverImage");
         }
 
         if (!empty($this->generator)) {
-			$gen = $this->decodeHtmlEntities($this->generator);
+            $gen = $this->decodeHtmlEntities($this->generator);
             $this->opf->addMeta("generator", $gen);
             $this->ncx->addMetaEntry("dtb:generator", $gen);
         }
@@ -1837,25 +1846,25 @@ class EPub {
             $this->opf->addMeta("generator", "EPub (Version " . self::VERSION . ") by A. Grandt, http://www.phpclasses.org/package/6115");
         }
 
-		reset($this->ncx->chapterList);
+        reset($this->ncx->chapterList);
         list($firstChapterName, $firstChapterNavPoint) = each($this->ncx->chapterList);
-		$firstChapterFileName = $firstChapterNavPoint->getContentSrc();
+        $firstChapterFileName = $firstChapterNavPoint->getContentSrc();
         $this->opf->addReference(Reference::TEXT, $this->decodeHtmlEntities($firstChapterName), $firstChapterFileName);
 
         $this->ncx->setUid($this->identifier);
 
         $this->ncx->setDocTitle($this->decodeHtmlEntities($this->title));
 
-		$this->ncx->referencesOrder = $this->referencesOrder;
-		if ($this->isReferencesAddedToToc) {
-			$this->ncx->finalizeReferences();
-		}
+        $this->ncx->referencesOrder = $this->referencesOrder;
+        if ($this->isReferencesAddedToToc) {
+            $this->ncx->finalizeReferences();
+        }
 
-		$this->finalizeTOC();
+        $this->finalizeTOC();
 
-		if (!$this->isEPubVersion2()) {
-			$this->addEPub3TOC("epub3toc.xhtml", $this->buildEPub3TOC());
-		}
+        if (!$this->isEPubVersion2()) {
+            $this->addEPub3TOC("epub3toc.xhtml", $this->buildEPub3TOC());
+        }
 
         $opfFinal = $this->fixEncoding($this->opf->finalize());
         $ncxFinal = $this->fixEncoding($this->ncx->finalize());
@@ -1922,20 +1931,20 @@ class EPub {
 
     }
 
-	/**
-	 * Cleanup the filepath, and remove leading . and / characters.
-	 * 
-	 * Sometimes, when a path is generated from multiple fragments, 
-	 *  you can get something like "../data/html/../images/image.jpeg"
-	 * ePub files don't work well with that, this will normalize that 
-	 *  example path to "data/images/image.jpeg"
-	 *
-	 * @param string $fileName
-	 * @return string normalized filename
-	 */
-	function normalizeFileName($fileName) {
+    /**
+     * Cleanup the filepath, and remove leading . and / characters.
+     * 
+     * Sometimes, when a path is generated from multiple fragments, 
+     *  you can get something like "../data/html/../images/image.jpeg"
+     * ePub files don't work well with that, this will normalize that 
+     *  example path to "data/images/image.jpeg"
+     *
+     * @param string $fileName
+     * @return string normalized filename
+     */
+    function normalizeFileName($fileName) {
         return preg_replace('#^[/\.]+#i', "", Zip::getRelativePath($fileName));
-	}
+    }
 
     /**
      * Save the ePub file to local disk.
@@ -1954,7 +1963,7 @@ class EPub {
             $this->finalize();
         }
 
-		if (stripos(strrev($fileName), "bupe.") !== 0) {
+        if (stripos(strrev($fileName), "bupe.") !== 0) {
             $fileName .= ".epub";
         }
 
@@ -2006,8 +2015,8 @@ class EPub {
         }
 
         if (TRUE === $this->zip->sendZip($fileName, "application/epub+zip")) {
-			return $fileName;
-		}
+            return $fileName;
+        }
         return FALSE;
     }
 
@@ -2020,7 +2029,7 @@ class EPub {
      *
      * @param int    $bookVersion UUID version to retrieve, See lib.uuid.manual.html for details.
      * @param string $url
-	 * @return string The formatted uuid
+     * @return string The formatted uuid
      */
     function createUUID($bookVersion = 4, $url = NULL) {
         include_once("lib.uuid.php");
@@ -2046,10 +2055,10 @@ class EPub {
      */
     function getCurrentServerURL() {
         $serverURL = 'http';
-		$https = filter_input(INPUT_SERVER, "HTTPS");
-		$port = filter_input(INPUT_SERVER, "SERVER_PORT");
+        $https = filter_input(INPUT_SERVER, "HTTPS");
+        $port = filter_input(INPUT_SERVER, "SERVER_PORT");
 
-		if ($https === "on") {
+        if ($https === "on") {
             $serverURL .= "s";
         }
         $serverURL .= "://" . filter_input(INPUT_SERVER, "SERVER_NAME");
@@ -2087,7 +2096,7 @@ class EPub {
         $height = -1;
         $mime = "application/octet-stream";
         $type = FALSE;
-		$ext = "";
+        $ext = "";
 
 
         $image = $this->getFileContents($source);
@@ -2126,48 +2135,48 @@ class EPub {
                 $ratio = $this->maxImageHeight/$height;
             }
 
-			if ($ratio < 1 || empty($mime) || ($this->isGifImagesEnabled !== FALSE && $mime == "image/gif")) {
-				$image_o = imagecreatefromstring($image);
-				$image_p = imagecreatetruecolor($width*$ratio, $height*$ratio);
-				
-				if ($mime == "image/png") {
-					imagealphablending($image_p, false);
-					imagesavealpha($image_p, true);  
-					imagealphablending($image_o, true);
-					
-					imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
-					ob_start();
-					imagepng($image_p, NULL, 9);
-					$image = ob_get_contents();
-					ob_end_clean();
+            if ($ratio < 1 || empty($mime) || ($this->isGifImagesEnabled !== FALSE && $mime == "image/gif")) {
+                $image_o = imagecreatefromstring($image);
+                $image_p = imagecreatetruecolor($width*$ratio, $height*$ratio);
+                
+                if ($mime == "image/png") {
+                    imagealphablending($image_p, false);
+                    imagesavealpha($image_p, true);  
+                    imagealphablending($image_o, true);
+                    
+                    imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
+                    ob_start();
+                    imagepng($image_p, NULL, 9);
+                    $image = ob_get_contents();
+                    ob_end_clean();
 
-					$ext = "png";
-				} else {
-					imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
-					ob_start();
-					imagejpeg($image_p, NULL, 80);
-					$image = ob_get_contents();
-					ob_end_clean();
+                    $ext = "png";
+                } else {
+                    imagecopyresampled($image_p, $image_o, 0, 0, 0, 0, ($width*$ratio), ($height*$ratio), $width, $height);
+                    ob_start();
+                    imagejpeg($image_p, NULL, 80);
+                    $image = ob_get_contents();
+                    ob_end_clean();
 
-					$mime = "image/jpeg";
-					$ext = "jpg";
-				}
-				imagedestroy($image_o);
-				imagedestroy($image_p);
-			}
+                    $mime = "image/jpeg";
+                    $ext = "jpg";
+                }
+                imagedestroy($image_o);
+                imagedestroy($image_p);
+            }
         }
 
-		if ($ext === "") {
-			static $mimeToExt = array (
-				'image/jpeg' => 'jpg',
-				'image/gif' => 'gif',
-				'image/png' => 'png'
+        if ($ext === "") {
+            static $mimeToExt = array (
+                'image/jpeg' => 'jpg',
+                'image/gif' => 'gif',
+                'image/png' => 'png'
             );
 
-			if (isset($mimeToExt[$mime])) {
-				$ext = $mimeToExt[$mime];
-			}
-		}
+            if (isset($mimeToExt[$mime])) {
+                $ext = $mimeToExt[$mime];
+            }
+        }
 
         $rv = array();
         $rv['width'] = $width*$ratio;
@@ -2190,41 +2199,41 @@ class EPub {
 
         if ($isExternal && $this->isCurlInstalled) {
             $ch = curl_init();
-			$outFile = NULL;
-			$fp = NULL;
-			$res = FALSE;
-			$info = array('http_code' => 500);
-			
-		    curl_setopt($ch, CURLOPT_HEADER, 0); 
+            $outFile = NULL;
+            $fp = NULL;
+            $res = FALSE;
+            $info = array('http_code' => 500);
+            
+            curl_setopt($ch, CURLOPT_HEADER, 0); 
             curl_setopt($ch, CURLOPT_URL, str_replace(" ","%20",$source));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-			curl_setopt($ch, CURLOPT_BUFFERSIZE, 4096);
-			
-			if ($toTempFile) {
-				$outFile = tempnam(sys_get_temp_dir(), "EPub_v" . EPub::VERSION . "_");
-				$fp = fopen($outFile, "w+b");
-				curl_setopt($ch, CURLOPT_FILE, $fp); 
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_BUFFERSIZE, 4096);
+            
+            if ($toTempFile) {
+                $outFile = tempnam(sys_get_temp_dir(), "EPub_v" . EPub::VERSION . "_");
+                $fp = fopen($outFile, "w+b");
+                curl_setopt($ch, CURLOPT_FILE, $fp); 
 
-				$res = curl_exec($ch);
-				$info = curl_getinfo($ch);
-				
-				curl_close($ch);
-				fclose($fp);
-			} else {
-				$res = curl_exec($ch);
-				$info = curl_getinfo($ch);
-				
-				curl_close($ch);
-			}
+                $res = curl_exec($ch);
+                $info = curl_getinfo($ch);
+                
+                curl_close($ch);
+                fclose($fp);
+            } else {
+                $res = curl_exec($ch);
+                $info = curl_getinfo($ch);
+                
+                curl_close($ch);
+            }
 
             if ($info['http_code'] == 200 && $res != false) {
-				if ($toTempFile) {
-					return $outFile;
-				}
+                if ($toTempFile) {
+                    return $outFile;
+                }
                 return $res;
             }
-			return FALSE;
+            return FALSE;
         }
 
         if ($this->isFileGetContentsInstalled && (!$isExternal || $this->isFileGetContentsExtInstalled)) {
@@ -2260,10 +2269,10 @@ class EPub {
         return $type[count($hits) - 1];
     }
 
-	/**
-	 * @param string $source URL Source
-	 * @return string MimeType
-	 */
+    /**
+     * @param string $source URL Source
+     * @return string MimeType
+     */
     function getMimeTypeFromUrl($source) {
         $ext = FALSE;
 
@@ -2284,33 +2293,33 @@ class EPub {
         return "application/octet-stream";
     }
 
-	/**
-	 * @param string $ext Extension
-	 * @return string MimeType
-	 */
-	function getMimeTypeFromExtension($ext) {
-		switch ($ext) {
-			case "jpg":
-			case "jpe":
-			case "jpeg":
-				return 'image/jpeg';
-			case "gif":
-				return 'image/gif';
-			case "png":
-				return 'image/png';
-			case "bmp":
-				return 'image/x-windows-bmp';
-			case "tif":
-			case "tiff":
-			case "cpt":
-				return 'image/tiff';
-			case "lbm":
-			case "ilbm":
-				return 'image/x-ilbm';
-			default:
-				return "application/octet-stream";
-		}
-	}
+    /**
+     * @param string $ext Extension
+     * @return string MimeType
+     */
+    function getMimeTypeFromExtension($ext) {
+        switch ($ext) {
+            case "jpg":
+            case "jpe":
+            case "jpeg":
+                return 'image/jpeg';
+            case "gif":
+                return 'image/gif';
+            case "png":
+                return 'image/png';
+            case "bmp":
+                return 'image/x-windows-bmp';
+            case "tif":
+            case "tiff":
+            case "cpt":
+                return 'image/tiff';
+            case "lbm":
+            case "ilbm":
+                return 'image/x-ilbm';
+            default:
+                return "application/octet-stream";
+        }
+    }
 
     /**
      * Encode html code to use html entities, safeguarding it from potential character encoding peoblems
@@ -2388,10 +2397,10 @@ class EPub {
     /**
      * Remove all non essential html tags and entities.
      *
-	 * @global type $htmlEntities
-	 * @param string $string
-	 * @return string with the stripped entities.
-	 */
+     * @global type $htmlEntities
+     * @param string $string
+     * @return string with the stripped entities.
+     */
     function decodeHtmlEntities($string) {
         global $htmlEntities;
 
@@ -2408,7 +2417,7 @@ class EPub {
         $string = str_replace('>', '&gt;', $string);
 
         return $string;
-	}
+    }
 
     /**
      * Simply remove all HTML tags, brute force and no finesse.
@@ -2420,10 +2429,10 @@ class EPub {
         return preg_replace('~<[^>]*>~', '', $string);
     }
 
-	/**
-	 * @return string
-	 */
-	function getLog() {
+    /**
+     * @return string
+     */
+    function getLog() {
         return $this->log->getLog();
     }
 }

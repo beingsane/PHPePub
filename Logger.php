@@ -23,11 +23,11 @@ class Logger {
      * @return void
      */
     function __construct($name = NULL, $isLogging = FALSE) {
-		if ($name === NULL) {
-			$this->name = "";
-		} else {
-			$this->name = $name . " : ";
-		}
+        if ($name === NULL) {
+            $this->name = "";
+        } else {
+            $this->name = $name . " : ";
+        }
         $this->isLogging = $isLogging;
         $this->start();
     }
@@ -48,8 +48,8 @@ class Logger {
             $this->tStart = gettimeofday();
             $this->tLast = $this->tStart;
             $this->log = "<h1>Log: " . $this->name . "</h1>\n<pre>Started: " . gmdate("D, d M Y H:i:s T", $this->tStart['sec']) . "\n &#916; Start ;  &#916; Last  ;";
-			$this->logLine("Start");
-		}
+            $this->logLine("Start");
+        }
     }
 
     function dumpInstalledModules() {
@@ -75,13 +75,13 @@ class Logger {
             $tL = $this->tLast['sec'] + (((int)($this->tLast['usec']/100))/10000);
             $tT = $tTemp['sec'] + (((int)($tTemp['usec']/100))/10000);
 
-			$logline = sprintf("\n+%08.04f; +%08.04f; ", ($tT-$tS), ($tT-$tL)) . $this->name . $line;
+            $logline = sprintf("\n+%08.04f; +%08.04f; ", ($tT-$tS), ($tT-$tL)) . $this->name . $line;
             $this->log .= $logline;
             $this->tLast = $tTemp;
 
-		    if ($this->isDebugging) {
-				echo "<pre>" . $logline . "\n</pre>\n";
-			}
+            if ($this->isDebugging) {
+                echo "<pre>" . $logline . "\n</pre>\n";
+            }
         }
     }
 

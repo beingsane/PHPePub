@@ -27,7 +27,7 @@ class EPubChapterSplitter {
         $this->bookVersion = is_string($bookVersion) ? trim($bookVersion) : EPub::BOOK_VERSION_EPUB2;
     }
 
-	/**
+    /**
      * Set default chapter target size.
      * Default is 250000 bytes, and minimum is 10240 bytes.
      *
@@ -186,11 +186,11 @@ class EPubChapterSplitter {
             // force pretty printing and correct formatting, should not be needed, but it is.
             $xml->loadXML($xml2Doc->saveXML());
 
-			$doc = $xml->saveXML();
+            $doc = $xml->saveXML();
 
-			if ($this->bookVersion === EPub::BOOK_VERSION_EPUB3) {
-				$doc = preg_replace('#^\s*<!DOCTYPE\ .+?>\s*#im', '', $doc);
-			}
+            if ($this->bookVersion === EPub::BOOK_VERSION_EPUB3) {
+                $doc = preg_replace('#^\s*<!DOCTYPE\ .+?>\s*#im', '', $doc);
+            }
 
             $chapterData[$splitOnSearchString ? $chapterNames[$idx] : $idx] = $doc;
         }
